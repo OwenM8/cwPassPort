@@ -42,22 +42,26 @@
             </div>
             
             <div class="auth-card">
-                <div id="demo-ui">
-                    <div class="input-wrapper">
-                        <input type="email" id="user-email" placeholder="Enter your email">
-                    </div>
-                    <button id="demo-register" class="btn-action">Create Passkey</button>
-                    <button id="demo-login" class="btn-action outline">Verify Passkey</button>
-                    
-                    <div id="status-msg" class="status">Waiting for interaction...</div>
-                    
-                    <div id="payload-display" class="payload-box" style="display: none;">
-                        <h4>Cryptographic Response:</h4>
-                        <pre><code id="payload-text"></code></pre>
-                    </div>
-                </div>
+    <div id="demo-ui">
+        <div class="input-wrapper">
+            <input type="email" id="user-email" placeholder="Enter developer email">
+        </div>
+        <button id="demo-register" class="btn-action">Run passport.register()</button>
+        <button id="demo-login" class="btn-action outline">Run passport.login()</button>
+        
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="terminal-title">passport-sdk-logs</span>
+            </div>
+            <div id="terminal-body" class="terminal-body">
+                <div class="log-line info">> SDK initialized from passportbycw.netlify.app</div>
             </div>
         </div>
+    </div>
+</div>
     </section>
 
     <script>
