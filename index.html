@@ -6,6 +6,8 @@
     <title>PassPort | The Developer's Passkey SDK</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <script src="https://passportbycw.netlify.app/sdk.js"></script>
 </head>
 <body>
 
@@ -22,9 +24,9 @@
 
     <header class="hero">
         <div class="container">
-            <div class="badge">v1.0 is now live</div>
+            <div class="badge">CDN Status: <span id="cdn-status">Checking...</span></div>
             <h1>Authentication that <span class="highlight">feels like magic.</span></h1>
-            <p>The lightweight SDK that replaces passwords with biometrics. Phishing-proof, developer-friendly, and ready for the future.</p>
+            <p>The lightweight SDK that replaces passwords with biometrics. Hosted on Netlify Edge for global performance.</p>
             <div class="hero-btns">
                 <a href="#demo" class="btn-primary">Try the Demo</a>
                 <a href="docs.html" class="btn-secondary">Read the Docs</a>
@@ -35,45 +37,82 @@
     <section id="demo" class="demo-section">
         <div class="container">
             <div class="section-header">
-                <h2>Test the Experience</h2>
-                <p>No account needed. Create a passkey on this device or your phone.</p>
+                <h2>Proof of Concept</h2>
+                <p>This demo is powered by the <code>sdk.js</code> file hosted on your Netlify CDN.</p>
             </div>
             
             <div class="auth-card">
                 <div id="demo-ui">
-                    <input type="email" id="user-email" placeholder="Enter your email">
-                    <button id="btn-register" class="btn-action">Create My Passkey</button>
-                    <button id="btn-login" class="btn-action outline">Sign In with Passkey</button>
-                    <div id="status-msg" class="status">Waiting for input...</div>
+                    <div class="input-wrapper">
+                        <input type="email" id="user-email" placeholder="Enter your email">
+                    </div>
+                    <button id="demo-register" class="btn-action">Create Passkey</button>
+                    <button id="demo-login" class="btn-action outline">Verify Passkey</button>
+                    
+                    <div id="status-msg" class="status">Waiting for interaction...</div>
+                    
+                    <div id="payload-display" class="payload-box" style="display: none;">
+                        <h4>Cryptographic Response:</h4>
+                        <pre><code id="payload-text"></code></pre>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="integration-preview">
-        <div class="container">
-            <div class="preview-card">
-                <div class="preview-content">
-                    <h2>Developer First</h2>
-                    <p>Built to be integrated in minutes. We handle the binary buffers and challenges so you don't have to.</p>
-                    <a href="docs.html" class="text-link">Explore the Full Documentation →</a>
-                </div>
-                <div class="preview-code">
-                    <pre><code>// Secure registration in one call
-import { passport } from '@passport/sdk';
+    <script>
+        // Check if CDN loaded correctly
+        window.addEventListener('load', () => {
+            const statusBadge = document.getElementById('cdn-status');
+            if (window.passport) {
+                statusBadge.innerText = "🟢 Operational";
+                statusBadge.style.color = "#22d3ee";
+            } else {
+                statusBadge.innerText = "🔴 Offline";
+                statusBadge.style.color = "#f87171";
+            }
+        });
 
-await passport.register(userEmail);</code></pre>
-                </div>
-            </div>
-        </div>
-    </section>
+        const status = document.getElementById('status-msg');
+        const payloadBox = document.getElementById('payload-display');
+        const payloadText = document.getElementById('payload-text');
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 PassPort Auth. Built for a passwordless web.</p>
-        </div>
-    </footer>
+        // DEMO REGISTER
+        document.getElementById('demo-register').addEventListener('click', async () => {
+            const email = document.getElementById('user-email').value || "visitor@example.com";
+            status.innerText = "Contacting Authenticator...";
+            
+            try {
+                // CALLING THE SDK FROM YOUR CDN
+                const cred = await passport.register(email);
+                
+                status.innerHTML = "✅ <b>Passkey Created!</b>";
+                payloadBox.style.display = "block";
+                // Show the raw ID as proof of work
+                payloadText.innerText = JSON.stringify({
+                    id: cred.id,
+                    type: cred.type,
+                    clientDataJSON: "verified"
+                }, null, 2);
 
-    <script src="passport.js"></script>
+            } catch (err) {
+                status.innerText = "Error: " + err.message;
+            }
+        });
+
+        // DEMO LOGIN
+        document.getElementById('demo-login').addEventListener('click', async () => {
+            status.innerText = "Verifying Identity...";
+            try {
+                const assertion = await passport.login();
+                status.innerHTML = "🚀 <b>Authenticated!</b> Welcome back.";
+                payloadBox.style.display = "block";
+                payloadText.innerText = "Signature Verified Successfully.";
+            } catch (err) {
+                status.innerText = "Auth failed: " + err.message;
+            }
+        });
+    </script>
+
 </body>
 </html>
