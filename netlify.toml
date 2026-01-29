@@ -1,0 +1,8 @@
+[[headers]]
+  for = "/sdk.js"
+  [headers.values]
+    # Allow ANY website to load this script (Crucial for a CDN)
+    Access-Control-Allow-Origin = "*"
+    # Tell browsers to cache this for high performance
+    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "application/javascript"
