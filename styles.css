@@ -58,3 +58,26 @@ footer { padding: 4rem 0; border-top: 1px solid var(--border); text-align: cente
     .preview-card { grid-template-columns: 1fr; padding: 2rem; text-align: center; }
     .hero-btns .btn-primary, .hero-btns .btn-secondary { margin: 0.5rem; width: 80%; }
 }
+
+.payload-box {
+    margin-top: 1.5rem;
+    text-align: left;
+    background: #000;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+.payload-box h4 {
+    font-size: 0.7rem;
+    color: var(--primary);
+    text-transform: uppercase;
+    margin: 0 0 0.5rem 0;
+}
+.payload-box pre {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+#cdn-status { font-weight: 800; transition: 0.3s; }
