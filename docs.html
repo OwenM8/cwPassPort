@@ -10,102 +10,69 @@
 <body>
 
     <aside class="sidebar">
-        <div class="sidebar-logo">
-            <a href="index.html">🔑 PassPort</a>
-        </div>
+        <div class="sidebar-logo"><a href="index.html">🔑 PassPort</a></div>
         <nav class="sidebar-nav">
             <div class="nav-group">
                 <h4>Getting Started</h4>
-                <a href="#introduction">Introduction</a>
-                <a href="#installation">Installation</a>
+                <a href="#install">Installation</a>
+                <a href="#usage">Basic Usage</a>
             </div>
             <div class="nav-group">
-                <h4>Core Concepts</h4>
-                <a href="#how-it-works">How Passkeys Work</a>
-                <a href="#security">Security Model</a>
-            </div>
-            <div class="nav-group">
-                <h4>SDK Reference</h4>
-                <a href="#registration">.register()</a>
-                <a href="#authentication">.authenticate()</a>
-                <a href="#error-codes">Error Codes</a>
+                <h4>Methods</h4>
+                <a href="#register">.register()</a>
+                <a href="#login">.login()</a>
             </div>
         </nav>
     </aside>
 
     <main class="content">
-        <section id="introduction">
-            <h1>Introduction</h1>
-            <p>PassPort is a specialized SDK designed to handle the complexity of the WebAuthn API. It allows you to implement passwordless login without worrying about binary buffers, challenges, or hardware compatibility.</p>
+        <section id="install">
+            <h1>Installation</h1>
+            <p>Paste this script tag into your <code>&lt;head&gt;</code>. This initializes the <code>passport</code> object on your window.</p>
+            <div class="code-block">
+                <code id="install-code">&lt;script src="https://yourdomain.com/sdk.js"&gt;&lt;/script&gt;</code>
+                <button class="copy-btn" onclick="copyCode('install-code')">Copy</button>
+            </div>
         </section>
 
         
 
-        <section id="installation">
-            <h1>Installation</h1>
-            <p>Add the PassPort client-side library to your project via our CDN.</p>
+        <section id="register">
+            <h1>Registering a User</h1>
+            <p>To create a passkey, call the register method. Ensure you pass a valid email string.</p>
             <div class="code-block">
-                <code>&lt;script src="https://cdn.passport-auth.io/v1/sdk.js"&gt;&lt;/script&gt;</code>
-            </div>
-        </section>
-
-        <section id="registration">
-            <h1>Registration</h1>
-            <p>To create a new passkey, pass a user object containing a unique identifier and an email address.</p>
-            <div class="code-block">
-                <pre>
-const user = {
-  id: "user_9921",
-  email: "jane.doe@example.com"
-};
-
-const credential = await passport.register(user);
-                </pre>
-            </div>
-            <p>Once successful, the SDK returns a <code>PublicKeyCredential</code> object which you should store on your server.</p>
-        </section>
-
-        <section id="authentication">
-            <h1>Authentication</h1>
-            <p>To sign a user in, simply call the authenticate method. The browser will automatically find valid passkeys for your domain.</p>
-            <div class="code-block">
-                <pre>
+                <pre><code id="reg-code">
+// Triggered by a button click on your site
 try {
-  const session = await passport.authenticate();
-  console.log("User verified:", session.user.id);
+  const credential = await passport.register("user@email.com");
+  console.log("Save this to your DB:", credential);
 } catch (err) {
-  handleError(err);
+  console.error("Auth failed", err);
 }
-                </pre>
+                </code></pre>
+                <button class="copy-btn" onclick="copyCode('reg-code')">Copy</button>
             </div>
         </section>
 
-        <section id="error-codes">
-            <h1>Error Codes</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Error</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><code>NotAllowedError</code></td>
-                        <td>The user cancelled the prompt or timed out.</td>
-                    </tr>
-                    <tr>
-                        <td><code>SecurityError</code></td>
-                        <td>Domain mismatch or insecure (HTTP) connection.</td>
-                    </tr>
-                </tbody>
-            </table>
+        <section id="login">
+            <h1>Authenticating</h1>
+            <p>Login requires no arguments. The browser will automatically prompt the user for their saved passkey.</p>
+            <div class="code-block">
+                <pre><code id="login-code">
+const assertion = await passport.login();
+// Verify assertion.response.signature on your backend
+                </code></pre>
+                <button class="copy-btn" onclick="copyCode('login-code')">Copy</button>
+            </div>
         </section>
-
-        <footer>
-            <p>Need help? Contact our developer relations team at support@passport-auth.io</p>
-        </footer>
     </main>
 
+    <script>
+        function copyCode(id) {
+            const text = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(text);
+            alert("Code copied to clipboard!");
+        }
+    </script>
 </body>
 </html>
