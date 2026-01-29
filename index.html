@@ -65,57 +65,51 @@
     </section>
 
     <script>
-        // Check if CDN loaded correctly
-        window.addEventListener('load', () => {
-            const statusBadge = document.getElementById('cdn-status');
-            if (window.passport) {
-                statusBadge.innerText = "🟢 Operational";
-                statusBadge.style.color = "#22d3ee";
-            } else {
-                statusBadge.innerText = "🔴 Offline";
-                statusBadge.style.color = "#f87171";
-            }
-        });
+    // Connect UI to Terminal Emulator
+const term = document.getElementById('terminal-body');
 
-        const status = document.getElementById('status-msg');
-        const payloadBox = document.getElementById('payload-display');
-        const payloadText = document.getElementById('payload-text');
+function log(type, text) {
+    const div = document.createElement('div');
+    div.className = `log-line ${type}`;
+    div.innerText = type === 'cmd' ? `> ${text}` : text;
+    term.appendChild(div);
+    term.scrollTop = term.scrollHeight;
+}
 
-        // DEMO REGISTER
-        document.getElementById('demo-register').addEventListener('click', async () => {
-            const email = document.getElementById('user-email').value || "visitor@example.com";
-            status.innerText = "Contacting Authenticator...";
-            
-            try {
-                // CALLING THE SDK FROM YOUR CDN
-                const cred = await passport.register(email);
-                
-                status.innerHTML = "✅ <b>Passkey Created!</b>";
-                payloadBox.style.display = "block";
-                // Show the raw ID as proof of work
-                payloadText.innerText = JSON.stringify({
-                    id: cred.id,
-                    type: cred.type,
-                    clientDataJSON: "verified"
-                }, null, 2);
+// Check CDN on Load
+window.addEventListener('load', () => {
+    if (window.passport) {
+        log('success', '🔑 PassPort SDK Loaded & Ready');
+    } else {
+        log('info', '❌ SDK not detected. Check CDN link.');
+    }
+});
 
-            } catch (err) {
-                status.innerText = "Error: " + err.message;
-            }
-        });
+// Demo: Register
+document.getElementById('demo-register').addEventListener('click', async () => {
+    const email = document.getElementById('user-email').value || "dev@example.com";
+    log('cmd', `passport.register("${email}")`);
+    
+    try {
+        const cred = await passport.register(email);
+        log('success', '✔ Device challenge signed');
+        log('info', `ID: ${cred.id.substring(0, 15)}...`);
+    } catch (err) {
+        log('info', `Error: ${err.message}`);
+    }
+});
 
-        // DEMO LOGIN
-        document.getElementById('demo-login').addEventListener('click', async () => {
-            status.innerText = "Verifying Identity...";
-            try {
-                const assertion = await passport.login();
-                status.innerHTML = "🚀 <b>Authenticated!</b> Welcome back.";
-                payloadBox.style.display = "block";
-                payloadText.innerText = "Signature Verified Successfully.";
-            } catch (err) {
-                status.innerText = "Auth failed: " + err.message;
-            }
-        });
+// Demo: Login
+document.getElementById('demo-login').addEventListener('click', async () => {
+    log('cmd', 'passport.login()');
+    try {
+        const auth = await passport.login();
+        log('success', '✔ Biometric identity verified');
+        log('info', `Signature: ${auth.response.signature.toString().substring(0, 15)}...`);
+    } catch (err) {
+        log('info', `Error: ${err.name}`);
+    }
+});
     </script>
 
 </body>
