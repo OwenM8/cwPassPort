@@ -10,69 +10,128 @@
 <body>
 
     <aside class="sidebar">
-        <div class="sidebar-logo"><a href="index.html">🔑 PassPort</a></div>
+        <div class="sidebar-logo">
+            <a href="index.html">🔑 PassPort</a>
+        </div>
         <nav class="sidebar-nav">
             <div class="nav-group">
                 <h4>Getting Started</h4>
-                <a href="#install">Installation</a>
-                <a href="#usage">Basic Usage</a>
+                <a href="#introduction">Introduction</a>
+                <a href="#installation">Installation</a>
             </div>
             <div class="nav-group">
-                <h4>Methods</h4>
-                <a href="#register">.register()</a>
-                <a href="#login">.login()</a>
+                <h4>Client SDK</h4>
+                <a href="#registration">.register()</a>
+                <a href="#authentication">.login()</a>
+            </div>
+            <div class="nav-group">
+                <h4>Advanced</h4>
+                <a href="#errors">Error Handling</a>
+                <a href="#security">Security Model</a>
             </div>
         </nav>
     </aside>
 
     <main class="content">
-        <section id="install">
-            <h1>Installation</h1>
-            <p>Paste this script tag into your <code>&lt;head&gt;</code>. This initializes the <code>passport</code> object on your window.</p>
-            <div class="code-block">
-                <code id="install-code">&lt;script src="https://yourdomain.com/sdk.js"&gt;&lt;/script&gt;</code>
-                <button class="copy-btn" onclick="copyCode('install-code')">Copy</button>
-            </div>
-        </section>
-
         
+        <section id="introduction">
+            <div class="badge">SDK v1.0.0</div>
+            <h1>Introduction</h1>
+            <p>PassPort is a lightweight wrapper for the WebAuthn API. It eliminates the need for developers to handle complex binary encoding, challenges, and browser-specific quirks when implementing Passkeys.</p>
+            
+            
+        </section>
 
-        <section id="register">
-            <h1>Registering a User</h1>
-            <p>To create a passkey, call the register method. Ensure you pass a valid email string.</p>
+        <section id="installation">
+            <h2>Installation</h2>
+            <p>To begin using PassPort, include the SDK via our global Edge CDN. This will initialize a <code>passport</code> object on the global window.</p>
+            
             <div class="code-block">
-                <pre><code id="reg-code">
-// Triggered by a button click on your site
+                <code id="install-tag">&lt;script src="https://passportbycw.netlify.app/sdk.js"&gt;&lt;/script&gt;</code>
+                <button class="copy-btn" onclick="copyCode('install-tag')">Copy</button>
+            </div>
+        </section>
+
+        <section id="registration">
+            <h2>User Registration</h2>
+            <p>Registration creates a new public/private key pair. The private key stays on the device, and the public key is returned for you to store in your database.</p>
+            
+            <div class="code-block">
+                <pre><code id="reg-js">
+// Simply pass the user's email or username
 try {
-  const credential = await passport.register("user@email.com");
-  console.log("Save this to your DB:", credential);
+  const credential = await passport.register("user@example.com");
+  
+  // Send 'credential' to your server to save
+  console.log("Success:", credential.id);
 } catch (err) {
-  console.error("Auth failed", err);
-}
-                </code></pre>
-                <button class="copy-btn" onclick="copyCode('reg-code')">Copy</button>
+  console.error("User cancelled or hardware error:", err);
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('reg-js')">Copy</button>
             </div>
         </section>
 
-        <section id="login">
-            <h1>Authenticating</h1>
-            <p>Login requires no arguments. The browser will automatically prompt the user for their saved passkey.</p>
+        <section id="authentication">
+            <h2>Authentication (Login)</h2>
+            <p>To log in a returning user, call the login method. The browser will automatically filter and show valid passkeys for your domain.</p>
+            
             <div class="code-block">
-                <pre><code id="login-code">
-const assertion = await passport.login();
-// Verify assertion.response.signature on your backend
-                </code></pre>
-                <button class="copy-btn" onclick="copyCode('login-code')">Copy</button>
+                <pre><code id="login-js">
+try {
+  const assertion = await passport.login();
+  
+  // Verify assertion.response.signature on your backend
+  console.log("Authenticated ID:", assertion.id);
+} catch (err) {
+  alert("Verification failed");
+}</code></pre>
+                <button class="copy-btn" onclick="copyCode('login-js')">Copy</button>
             </div>
         </section>
+
+        <section id="errors">
+            <h2>Error Handling</h2>
+            <p>The SDK returns standard DOM exceptions. The most common errors include:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Error Name</th>
+                        <th>Context</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>NotAllowedError</code></td>
+                        <td>User clicked "Cancel" or the biometric prompt timed out.</td>
+                    </tr>
+                    <tr>
+                        <td><code>SecurityError</code></td>
+                        <td>The app is running on an insecure domain (HTTP).</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="security">
+            <h2>Security Model</h2>
+            <p>PassPort uses the <b>FIDO2 L1</b> security standard. All challenges are cryptographically signed using the device's Secure Enclave. Your users' biometric data (fingerprints/FaceID) never leaves their device and is never sent to our servers or yours.</p>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 PassPort Auth SDK. Built with 💙 for developers.</p>
+        </footer>
     </main>
 
     <script>
         function copyCode(id) {
             const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text);
-            alert("Code copied to clipboard!");
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                btn.innerText = "Copied!";
+                setTimeout(() => btn.innerText = "Copy", 2000);
+            });
         }
     </script>
+
 </body>
 </html>
