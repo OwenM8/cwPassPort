@@ -186,6 +186,25 @@ try {
         </footer>
     </main>
 
+    <div id="ai-widget">
+        <button id="ai-toggle-btn" onclick="toggleChat()">🤖 Ask PassPort AI</button>
+        <div id="ai-window" class="hidden">
+            <div class="ai-header">
+                <span>PassPort Assistant</span>
+                <button onclick="toggleChat()" class="close-btn">&times;</button>
+            </div>
+            <div id="ai-messages">
+                <div class="message bot">Hi! I'm trained on the PassPort SDK. How can I help you build today?</div>
+            </div>
+            <div class="ai-input-area">
+                <input type="text" id="ai-input" placeholder="Type a question..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="ai-chat.js"></script>
+    <script>
     <script>
         function copyCode(id) {
             const text = document.getElementById(id).innerText;
