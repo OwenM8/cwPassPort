@@ -3,135 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Documentation | PassPort SDK</title>
+    <title>PassPort SDK | Full Documentation</title>
     <link rel="stylesheet" href="docs.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <aside class="sidebar">
         <div class="sidebar-logo">
-            <a href="index.html">🔑 PassPort</a>
+            <a href="index.html">🔑 PassPort Docs</a>
         </div>
         <nav class="sidebar-nav">
             <div class="nav-group">
-                <h4>Getting Started</h4>
-                <a href="#introduction">Introduction</a>
-                <a href="#installation">Installation</a>
+                <h4>Quick Start</h4>
+                <a href="#intro">How it Works</a>
+                <a href="#install">Installation (CDN)</a>
             </div>
             <div class="nav-group">
-                <h4>Client SDK</h4>
-                <a href="#registration">.register()</a>
-                <a href="#authentication">.login()</a>
+                <h4>Implementation</h4>
+                <a href="#register">Step 1: Registration</a>
+                <a href="#login">Step 2: Authentication</a>
+                <a href="#backend">Saving to Database</a>
             </div>
             <div class="nav-group">
-                <h4>Advanced</h4>
-                <a href="#errors">Error Handling</a>
-                <a href="#security">Security Model</a>
+                <h4>Deep Dive</h4>
+                <a href="#debugging">Debugging & Errors</a>
+                <a href="#requirements">HTTPS & Requirements</a>
             </div>
         </nav>
     </aside>
 
     <main class="content">
         
-        <section id="introduction">
-            <div class="badge">SDK v1.0.0</div>
-            <h1>Introduction</h1>
-            <p>PassPort is a lightweight wrapper for the WebAuthn API. It eliminates the need for developers to handle complex binary encoding, challenges, and browser-specific quirks when implementing Passkeys.</p>
+        <section id="intro">
+            <div class="badge">SDK v1.0</div>
+            <h1>The Developer's Guide</h1>
+            <p class="lead">PassPort allows you to add Biometric Login (Passkeys) to any website using a single JavaScript file. We abstract the complex binary arithmetic of WebAuthn into two simple functions.</p>
             
-            
-        </section>
-
-        <section id="installation">
-            <h2>Installation</h2>
-            <p>To begin using PassPort, include the SDK via our global Edge CDN. This will initialize a <code>passport</code> object on the global window.</p>
-            
-            <div class="code-block">
-                <code id="install-tag">&lt;script src="https://passportbycw.netlify.app/sdk.js"&gt;&lt;/script&gt;</code>
-                <button class="copy-btn" onclick="copyCode('install-tag')">Copy</button>
+            <div class="info-box">
+                <strong>Why use this SDK?</strong>
+                Native WebAuthn requires you to convert strings to <code>Uint8Arrays</code>, manage <code>ArrayBuffers</code>, and handle base64 encoding manually. PassPort handles all of this automatically.
             </div>
         </section>
 
-        <section id="registration">
-            <h2>User Registration</h2>
-            <p>Registration creates a new public/private key pair. The private key stays on the device, and the public key is returned for you to store in your database.</p>
+        <section id="install">
+            <h2>⚡ Installation</h2>
+            <p>You can add PassPort to any HTML page (React, Vue, WordPress, PHP, etc.) by including our global CDN link. Place this script tag at the end of your <code>&lt;body&gt;</code> or in the <code>&lt;head&gt;</code>.</p>
             
             <div class="code-block">
-                <pre><code id="reg-js">
-// Simply pass the user's email or username
+                <div class="code-header">index.html</div>
+                <pre><code id="c1">&lt;script src="https://passportbycw.netlify.app/sdk.js"&gt;&lt;/script&gt;</code></pre>
+                <button class="copy-btn" onclick="copyCode('c1')">Copy</button>
+            </div>
+
+            <p>Once included, a global object <code>window.passport</code> is created and ready to use.</p>
+        </section>
+
+        <section id="register">
+            <h2>Step 1: Registration</h2>
+            <p>Registration is the process of creating a public/private key pair on the user's device. The private key stays in their TouchID/FaceID enclave; the public key is sent to you.</p>
+            
+            <h3>The Code</h3>
+            <p>Call <code>passport.register(email)</code> when the user clicks your "Sign Up" button.</p>
+
+            <div class="code-block">
+                <div class="code-header">app.js</div>
+                <pre><code id="c2">
+const email = "user@example.com";
+
 try {
-  const credential = await passport.register("user@example.com");
-  
-  // Send 'credential' to your server to save
-  console.log("Success:", credential.id);
-} catch (err) {
-  console.error("User cancelled or hardware error:", err);
-}</code></pre>
-                <button class="copy-btn" onclick="copyCode('reg-js')">Copy</button>
+    // 1. Trigger the browser's biometric prompt
+    const credential = await passport.register(email);
+
+    // 2. Log the result to see what to save
+    console.log("Passkey Created:", credential);
+    
+    // 3. TODO: Send 'credential' to your backend API
+    // await sendToBackend(credential);
+
+} catch (error) {
+    // Handles user cancellation or hardware issues
+    console.error("Registration failed:", error.message);
+}
+                </code></pre>
+                <button class="copy-btn" onclick="copyCode('c2')">Copy</button>
             </div>
         </section>
 
-        <section id="authentication">
-            <h2>Authentication (Login)</h2>
-            <p>To log in a returning user, call the login method. The browser will automatically filter and show valid passkeys for your domain.</p>
+        <section id="backend">
+            <h2>💾 Saving to your Database</h2>
+            <p>When registration succeeds, the SDK returns a <code>PublicKeyCredential</code> object. You need to save specific fields to your database to log the user in later.</p>
+            
+            <h3>The Data Structure</h3>
+            <p>Here is what the object looks like. You must save the <strong>ID</strong> (which acts like a username) and the <strong>Raw ID</strong>.</p>
             
             <div class="code-block">
-                <pre><code id="login-js">
+                <div class="code-header">JSON Output Example</div>
+                <pre><code id="c3">
+{
+  "id": "AERTx29...",       // <-- SAVE THIS (The Credential ID)
+  "type": "public-key",
+  "rawId": "ArrayBuffer...", // <-- SAVE THIS (Binary identifier)
+  "response": {
+    "clientDataJSON": "...",
+    "attestationObject": "..."
+  }
+}
+                </code></pre>
+            </div>
+            <p><strong>Note:</strong> Most databases (SQL/Mongo) cannot store Raw Binary Arrays. You may need to convert the <code>rawId</code> to a Base64 string before saving.</p>
+        </section>
+
+        <section id="login">
+            <h2>Step 2: Authentication (Login)</h2>
+            <p>When a user returns, you don't need their password. You just need to ask the browser "Do you hold a key for this website?"</p>
+
+            <div class="code-block">
+                <div class="code-header">app.js</div>
+                <pre><code id="c4">
 try {
-  const assertion = await passport.login();
-  
-  // Verify assertion.response.signature on your backend
-  console.log("Authenticated ID:", assertion.id);
-} catch (err) {
-  alert("Verification failed");
-}</code></pre>
-                <button class="copy-btn" onclick="copyCode('login-js')">Copy</button>
+    // No arguments needed. The browser knows the domain.
+    const assertion = await passport.login();
+
+    console.log("User Identified:", assertion.id);
+    alert("Logged in successfully!");
+
+} catch (error) {
+    console.error("Login failed:", error.message);
+}
+                </code></pre>
+                <button class="copy-btn" onclick="copyCode('c4')">Copy</button>
             </div>
         </section>
 
-        <section id="errors">
-            <h2>Error Handling</h2>
-            <p>The SDK returns standard DOM exceptions. The most common errors include:</p>
+        <section id="requirements">
+            <h2>⚠️ Crucial Requirements</h2>
+            <div class="warning-box">
+                <strong>1. HTTPS is Mandatory</strong><br>
+                WebAuthn is a powerful API. Browsers <strong>block</strong> it completely if your site is not served over <code>https://</code>. It will work on <code>http://localhost</code> for testing, but never on a live HTTP site.
+            </div>
+            <br>
+            <div class="warning-box">
+                <strong>2. User Interaction Required</strong><br>
+                You cannot call <code>passport.register()</code> immediately on page load. It <strong>must</strong> be triggered by a user action, like a button click. If you try to run it automatically, the browser will throw a <code>NotAllowedError</code>.
+            </div>
+        </section>
+
+        <section id="debugging">
+            <h2>🐞 Debugging & Errors</h2>
+            <p>If things aren't working, check your Browser Console (F12). Here are the most common error codes:</p>
+            
             <table>
                 <thead>
                     <tr>
                         <th>Error Name</th>
-                        <th>Context</th>
+                        <th>Meaning</th>
+                        <th>How to Fix</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><code>NotAllowedError</code></td>
-                        <td>User clicked "Cancel" or the biometric prompt timed out.</td>
+                        <td>User clicked Cancel or timed out.</td>
+                        <td>Prompt the user to try again.</td>
                     </tr>
                     <tr>
                         <td><code>SecurityError</code></td>
-                        <td>The app is running on an insecure domain (HTTP).</td>
+                        <td>Domain mismatch.</td>
+                        <td>Ensure you are using HTTPS or localhost.</td>
+                    </tr>
+                    <tr>
+                        <td><code>NotSupportedError</code></td>
+                        <td>Hardware missing.</td>
+                        <td>The device has no biometric sensor (TouchID/FaceID).</td>
                     </tr>
                 </tbody>
             </table>
         </section>
 
-        <section id="security">
-            <h2>Security Model</h2>
-            <p>PassPort uses the <b>FIDO2 L1</b> security standard. All challenges are cryptographically signed using the device's Secure Enclave. Your users' biometric data (fingerprints/FaceID) never leaves their device and is never sent to our servers or yours.</p>
-        </section>
-
         <footer>
-            <p>&copy; 2026 PassPort Auth SDK. Built with 💙 for developers.</p>
+            <p>&copy; 2026 PassPort SDK. <a href="#">Contact Support</a></p>
         </footer>
     </main>
 
     <script>
         function copyCode(id) {
             const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = event.target;
-                btn.innerText = "Copied!";
-                setTimeout(() => btn.innerText = "Copy", 2000);
-            });
+            navigator.clipboard.writeText(text);
+            const btn = event.target;
+            const original = btn.innerText;
+            btn.innerText = "Copied!";
+            setTimeout(() => btn.innerText = original, 2000);
         }
     </script>
-
 </body>
 </html>
