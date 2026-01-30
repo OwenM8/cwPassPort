@@ -13,7 +13,7 @@
 
     <nav>
         <div class="container">
-            <span class="logo">🔑 PassPort</span>
+            <a href="#" class="logo">🔑 PassPort</a>
             <div class="nav-links">
                 <a href="#demo">Live Demo</a>
                 <a href="docs.html" class="docs-link">See Docs</a>
@@ -26,7 +26,7 @@
         <div class="container">
             <div class="badge">CDN Status: <span id="cdn-status">Checking...</span></div>
             <h1>Authentication that <span class="highlight">feels like magic.</span></h1>
-            <p>The lightweight SDK that replaces passwords with biometrics. Hosted on Netlify Edge for global performance.</p>
+            <p>The lightweight SDK that replaces passwords with biometrics. Hosted on Netlify Edge for global performance and 99.9% uptime.</p>
             <div class="hero-btns">
                 <a href="#demo" class="btn-primary">Try the Demo</a>
                 <a href="docs.html" class="btn-secondary">Read the Docs</a>
@@ -38,79 +38,125 @@
         <div class="container">
             <div class="section-header">
                 <h2>Proof of Concept</h2>
-                <p>This demo is powered by the <code>sdk.js</code> file hosted on your Netlify CDN.</p>
+                <p>This interactive terminal shows exactly what happens inside the SDK when you call our methods.</p>
             </div>
             
             <div class="auth-card">
-    <div id="demo-ui">
-        <div class="input-wrapper">
-            <input type="email" id="user-email" placeholder="Enter developer email">
-        </div>
-        <button id="demo-register" class="btn-action">Run passport.register()</button>
-        <button id="demo-login" class="btn-action outline">Run passport.login()</button>
-        
-        <div class="terminal-window">
-            <div class="terminal-header">
-                <span class="dot red"></span>
-                <span class="dot yellow"></span>
-                <span class="dot green"></span>
-                <span class="terminal-title">passport-sdk-logs</span>
+                <div id="demo-ui">
+                    <div class="input-wrapper">
+                        <input type="email" id="user-email" placeholder="Enter developer email">
+                    </div>
+                    <button id="demo-register" class="btn-action">Run passport.register()</button>
+                    <button id="demo-login" class="btn-action outline">Run passport.login()</button>
+                    
+                    <div class="terminal-window">
+                        <div class="terminal-header">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                            <span class="terminal-title">passport-sdk-logs</span>
+                        </div>
+                        <div id="terminal-body" class="terminal-body">
+                            </div>
+                    </div>
+                </div>
             </div>
-            <div id="terminal-body" class="terminal-body">
-                <div class="log-line info">> SDK initialized from passportbycw.netlify.app</div>
-            </div>
         </div>
-    </div>
-</div>
     </section>
 
+    <section class="integration-preview">
+        <div class="container">
+            <div class="preview-card">
+                <div class="preview-content">
+                    <h2>Developer First</h2>
+                    <p>Stop wrestling with binary buffers. Implement WebAuthn in two lines of code and give your users a friction-free login experience.</p>
+                    <a href="docs.html" class="text-link">Explore the Full Documentation →</a>
+                </div>
+                <div class="preview-code">
+                    <pre><code>// registration.js
+import { passport } from '@passport/sdk';
+
+const cred = await passport.register(email);</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 PassPort Auth. Powered by Netlify & GitHub.</p>
+        </div>
+    </footer>
+
     <script>
-    // Connect UI to Terminal Emulator
-const term = document.getElementById('terminal-body');
+        const term = document.getElementById('terminal-body');
+        const statusBadge = document.getElementById('cdn-status');
 
-function log(type, text) {
-    const div = document.createElement('div');
-    div.className = `log-line ${type}`;
-    div.innerText = type === 'cmd' ? `> ${text}` : text;
-    term.appendChild(div);
-    term.scrollTop = term.scrollHeight;
-}
+        // Helper to append lines to our "Terminal"
+        function logToTerminal(type, text) {
+            const div = document.createElement('div');
+            div.className = `log-line ${type}`;
+            div.style.marginBottom = "4px";
+            
+            if (type === 'success') div.style.color = "#39d353";
+            if (type === 'cmd') div.style.color = "#22d3ee";
+            if (type === 'info') div.style.color = "#8b949e";
+            if (type === 'data') {
+                div.style.color = "#d2a8ff";
+                div.style.paddingLeft = "10px";
+                div.style.fontSize = "0.75rem";
+            }
 
-// Check CDN on Load
-window.addEventListener('load', () => {
-    if (window.passport) {
-        log('success', '🔑 PassPort SDK Loaded & Ready');
-    } else {
-        log('info', '❌ SDK not detected. Check CDN link.');
-    }
-});
+            div.innerText = type === 'cmd' ? `> ${text}` : text;
+            term.appendChild(div);
+            term.scrollTop = term.scrollHeight;
+        }
 
-// Demo: Register
-document.getElementById('demo-register').addEventListener('click', async () => {
-    const email = document.getElementById('user-email').value || "dev@example.com";
-    log('cmd', `passport.register("${email}")`);
-    
-    try {
-        const cred = await passport.register(email);
-        log('success', '✔ Device challenge signed');
-        log('info', `ID: ${cred.id.substring(0, 15)}...`);
-    } catch (err) {
-        log('info', `Error: ${err.message}`);
-    }
-});
+        // 1. Check if the SDK loaded from Netlify
+        window.addEventListener('load', () => {
+            if (window.passport) {
+                statusBadge.innerText = "🟢 Operational";
+                statusBadge.style.color = "#22d3ee";
+                logToTerminal('success', '🔑 PassPort SDK Loaded & Ready');
+                logToTerminal('info', 'Listening for developer input...');
+            } else {
+                statusBadge.innerText = "🔴 Offline";
+                statusBadge.style.color = "#f87171";
+                logToTerminal('info', '❌ SDK failed to load from CDN.');
+            }
+        });
 
-// Demo: Login
-document.getElementById('demo-login').addEventListener('click', async () => {
-    log('cmd', 'passport.login()');
-    try {
-        const auth = await passport.login();
-        log('success', '✔ Biometric identity verified');
-        log('info', `Signature: ${auth.response.signature.toString().substring(0, 15)}...`);
-    } catch (err) {
-        log('info', `Error: ${err.name}`);
-    }
-});
+        // 2. Handle Registration Demo
+        document.getElementById('demo-register').addEventListener('click', async () => {
+            const email = document.getElementById('user-email').value || "dev@example.com";
+            logToTerminal('cmd', `passport.register("${email}")`);
+            
+            try {
+                // Calling your actual SDK
+                const cred = await passport.register(email);
+                
+                logToTerminal('success', '✔ Cryptographic challenge signed');
+                logToTerminal('data', `Raw ID: ${cred.id.substring(0, 25)}...`);
+                logToTerminal('success', '✔ Registration complete');
+            } catch (err) {
+                logToTerminal('info', `Error: ${err.message}`);
+            }
+        });
+
+        // 3. Handle Login Demo
+        document.getElementById('demo-login').addEventListener('click', async () => {
+            logToTerminal('cmd', 'passport.login()');
+            try {
+                // Calling your actual SDK
+                const assertion = await passport.login();
+                
+                logToTerminal('success', '✔ Biometric identity verified');
+                logToTerminal('data', `Signature: ${assertion.response.signature.toString().substring(0, 20)}...`);
+                logToTerminal('success', '✔ Session authenticated');
+            } catch (err) {
+                logToTerminal('info', `Auth failed: ${err.name}`);
+            }
+        });
     </script>
-
 </body>
 </html>
